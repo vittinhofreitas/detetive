@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detetive de Talentos: Altas Habilidades</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('https://lh3.googleusercontent.com/pw/AP1GczNs_P19u010h2TjpJu-FqMbej9AAwRKoXTWAf4OCcAfEMTDyer96KL_Xg3aMNXnyvTf0ETo0Cr8PO-AYEMrIiVmYy1fCp-EZtKT6ZOqTBkhnulCQflJ1yu5tNJHWr7gAB-27uxFEqyet5MweVm2bwJ-wg=w1122-h641-s-no-gm');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Mantém a imagem fixa ao rolar */
+            color: #1e293b; /* Texto escuro padrão para contraste */
+            /* FIM: Configuração para BACKGROUND DE IMAGEM */
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .clue {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: inherit; /* Pista fica da cor do texto normal */
+            font-weight: inherit; /* Pista fica com o peso do texto normal */
+        }
+        .clue:hover:not(.found) {
+            color: #ef4444; /* Vermelho para destaque ao passar o mouse */
+            text-shadow: 0 0 8px rgba(239, 68, 68, 0.5); /* Brilho vermelho */
+        }
+        .clue.found {
+            background-color: #fde047; /* Amarelo ouro vibrante */
+            color: #1e293b; /* Texto escuro para contraste */
+            cursor: default;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .game-card {
+            background-color: rgba(255, 255, 255, 0.95); /* Card branco semi-transparente para ver o fundo */
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px); /* Efeito de desfoque para o fundo */
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* Azul primário */
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* Azul mais escuro */
+        }
+        .text-accent-blue { color: #3b82f6; } /* Azul */
+        .text-accent-red { color: #ef4444; } /* Vermelho */
+        .text-accent-yellow { color: #fde047; } /* Amarelo */
+        .text-accent-green { color: #22c55e; } /* Verde */
+
+        .text-header {
+            color: #3b82f6; /* Títulos principais em azul */
+        }
+        .diagnosis-card {
+            border-left-width: 4px;
+            border-left-color: #22c55e; /* Verde para diagnóstico */
+            background-color: rgba(248, 250, 252, 0.9); /* Fundo claro semi-transparente */
+        }
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.98); /* Modal branco quase opaco */
+            border-width: 2px;
+            border-color: #22c55e; /* Borda verde */
+            backdrop-filter: blur(8px);
+        }
+        /* Transição do modal */
+        .modal {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal.open .modal-content {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="w-full max-w-3xl mx-auto">
+        
+        <!-- Tela Inicial --><div id="start-screen" class="text-center p-8 rounded-2xl shadow-2xl game-card">
+            <div class="mb-4">
+                <svg class="w-20 h-20 mx-auto text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold mb-2 font-serif text-header">Detetive de Talentos</h1>
+            <p class="text-gray-600 text-lg mb-6">Uma investigação sobre Altas Habilidades e Superdotação</p>
+            <p class="text-gray-800 mb-8 max-w-xl mx-auto">Sua missão é analisar os relatórios de alunos e encontrar pistas sutis que indicam altas habilidades. Passe o mouse sobre o texto e clique nas frases que parecem um "sinal" para desvendar o caso. Boa sorte!</p>
+            <button onclick="startGame()" class="btn-primary py-3 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
+                Começar a Investigação
+            </button>
+        </div>
+
+        <!-- Tela do Jogo --><div id="game-screen" class="hidden p-8 rounded-2xl shadow-2xl game-card">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold font-serif text-accent-green">Caso: <span id="student-name" class="text-accent-red font-semibold"></span></h2>
+                <p class="text-gray-700">Analise o relatório e encontre as pistas.</p>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg mb-6 text-gray-800">
+                <p id="student-description" class="text-lg leading-relaxed"></p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xl font-bold text-accent-blue">Pistas encontradas: <span id="clues-found" class="text-accent-red">0</span> de <span id="total-clues" class="text-accent-red">0</span></p>
+                <button id="next-button" onclick="nextAction()" class="hidden btn-primary py-2 px-6 rounded-lg">
+                    Ver Diagnóstico
+                </button>
+            </div>
+            <div id="diagnosis-screen" class="hidden mt-6 p-6 rounded-lg diagnosis-card">
+                <h3 class="text-2xl font-bold text-accent-green font-serif mb-3">Diagnóstico do Caso</h3>
+                <p id="diagnosis-text" class="text-gray-700"></p>
+            </div>
+        </div>
+        
+        <!-- Tela Final --><div id="end-screen" class="hidden text-center p-8 rounded-2xl shadow-2xl game-card">
+            <h2 class="text-3xl font-bold font-serif text-accent-blue mb-4">Investigação Concluída!</h2>
+            <p class="text-gray-800 mb-8 max-w-xl mx-auto">Parabéns, detetive! Você analisou todos os casos. A identificação dos sinais é o primeiro e mais importante passo para criar um ambiente que nutre os talentos, em vez de reprimi-los. A verdadeira inclusão começa com um olhar atento e sensível. Lembre-se, o potencial está em toda parte, esperando ser descoberto!</p>
+            <button onclick="restartGame()" class="btn-primary py-3 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
+                Investigar Novos Casos
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Feedback da Pista --><div id="feedback-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 modal" onclick="closeModal(event)">
+        <div class="modal-content w-full max-w-md p-6 rounded-2xl shadow-2xl transform scale-95">
+            <h3 class="text-xl font-bold text-accent-green mb-2">Pista Encontrada!</h3>
+            <p id="feedback-text" class="text-gray-700"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- DADOS DO JOGO ---
+        const students = [
+            {
+                name: "Leo",
+                description: `Leo é um aluno agitado. <span class="clue" data-feedback="A rapidez de aprendizagem é um sinal clássico. A agitação que vem depois é, na verdade, uma busca por novos estímulos, pois o tédio se instala facilmente.">Ele termina as tarefas muito rápido</span> e, em seguida, <span class="clue" data-feedback="A curiosidade é intensa. Ele não se contenta com o básico e seu pensamento o leva a explorar conexões que outros não veem, o que pode ser visto como 'fuga do assunto'.">começa a conversar sobre outros assuntos</span>. Durante a chamada, <span class="clue" data-feedback="Muitas vezes, não é uma tentativa de ser 'o sabe-tudo', mas um raciocínio lógico apurado e um forte senso de justiça. Eles percebem inconsistências rapidamente.">ele frequentemente corrige a professora</span> se alguma informação parece incorreta.`,
+                diagnosis: "Leo demonstra sinais clássicos de alta habilidade na área intelectual. Sua aparente 'indisciplina' é, na verdade, uma combinação de pensamento acelerado, tédio com a rotina e uma curiosidade que precisa de mais desafios para ser canalizada produtivamente."
+            },
+            {
+                name: "Sofia",
+                description: `Sofia é muito quieta e <span class="clue" data-feedback="O isolamento pode ocorrer quando a criança não encontra pares com os mesmos interesses ou nível de profundidade, sentindo-se diferente dos demais.">prefere trabalhar sozinha</span>. Suas redações são impecáveis, <span class="clue" data-feedback="Um vocabulário rico e o uso de estruturas complexas na fala ou na escrita são indicadores fortes de alta habilidade verbal.">usando palavras que nem se espera para sua idade</span>. No entanto, se ela comete um pequeno erro, <span class="clue" data-feedback="O perfeccionismo e a alta sensibilidade emocional são traços comuns. A frustração com o erro pode ser intensa, pois a autoexigência é muito elevada.">ela fica visivelmente frustrada e quer refazer tudo do zero</span>.`,
+                diagnosis: "Sofia apresenta características de alta habilidade verbal e perfeccionismo. Seu comportamento quieto pode esconder uma grande sensibilidade e uma necessidade de apoio emocional para aprender a lidar com erros e frustrações, valorizando o processo tanto quanto o resultado."
+            },
+            {
+                name: "Miguel",
+                description: `Miguel tem uma paixão: dinossauros. Ele <span class="clue" data-feedback="O interesse intenso e profundo em um tópico específico é uma forma de manifestar a alta habilidade. Ele se torna um 'mini-especialista' no assunto.">só quer falar sobre isso</span> e seus cadernos são cheios de <span class="clue" data-feedback="A criatividade e a imaginação podem ser muito avançadas, resultando em produções ricas em detalhes, seja na escrita, no desenho ou em outras formas de expressão.">desenhos incrivelmente detalhados de espécies que ele mesmo cria</span>. Ele tem <span class="clue" data-feedback="O hiperfoco em uma área de interesse pode dificultar a transição para outras tarefas que não o motivam da mesma forma.">dificuldade em mudar de tópico quando solicitado</span>, mas sua capacidade de argumentação sobre seu tema de interesse é impressionante.`,
+                diagnosis: "Miguel demonstra sinais de alta habilidade na área criativa e um possível pensamento focado. Seu interesse profundo não deve ser visto como uma limitação, mas como um portal para desenvolver outras habilidades, como pesquisa, escrita e apresentação, usando sua paixão como motivação."
+            },
+            {
+                name: "Helena",
+                description: `Helena é muito observadora. Ela <span class="clue" data-feedback="Uma percepção aguçada e a capacidade de conectar ideias aparentemente distintas são traços de inteligência espacial e lógica.">percebe detalhes que a maioria não vê nas aulas de ciências</span> e sempre <span class="clue" data-feedback="A capacidade de fazer perguntas profundas e complexas, buscando o 'porquê' das coisas, é um forte indicador de curiosidade intelectual e pensamento crítico.">questiona o 'porquê' dos fenômenos de forma muito madura</span>. Quando em grupo, <span class="clue" data-feedback="Naturalmente, alguns alunos com altas habilidades demonstram liderança, organização e a capacidade de guiar os colegas para um objetivo comum.">ela organiza os colegas e assume a liderança do trabalho</span>, mas às vezes fica impaciente com o ritmo dos outros.`,
+                diagnosis: "Helena exibe alta habilidade em liderança e raciocínio lógico-científico. Sua capacidade de observação e questionamento profundo precisa ser nutrida com desafios que a permitam explorar e liderar projetos, aprendendo também a lidar com a paciência e a colaboração."
+            },
+            {
+                name: "Rafael",
+                description: `Rafael é muito empático. Ele <span class="clue" data-feedback="Uma alta sensibilidade e a capacidade de compreender e sentir as emoções dos outros são características de alta habilidade socioemocional e interpessoal.">percebe quando um colega está triste ou com dificuldades</span> e <span class="clue" data-feedback="A busca por justiça e a preocupação com o bem-estar coletivo são sinais de um forte senso ético e moral, comum em alunos com altas habilidades.">sempre tenta ajudar e defender os mais fracos</span>. Apesar de ser muito bom em matemática, <span class="clue" data-feedback="O desinteresse por atividades repetitivas ou 'fáceis' é comum. Eles precisam de problemas mais complexos e desafiadores para se sentirem motivados.">ele se entedia facilmente com exercícios repetitivos</span>, preferindo resolver problemas lógicos mais complexos ou criar seus próprios desafios.`,
+                diagnosis: "Rafael demonstra alta habilidade socioemocional e lógica. Sua inteligência interpessoal e senso de justiça são notáveis, mas ele precisa de desafios intelectuais que o mantenham engajado, explorando seu potencial em áreas como matemática aplicada e resolução de problemas sociais."
+            }
+        ];
+
+        // --- LÓGICA DO JOGO ---
+        let currentStudentIndex = 0;
+        let foundCluesCount = 0;
+
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const studentName = document.getElementById('student-name');
+        const studentDescription = document.getElementById('student-description');
+        const cluesFound = document.getElementById('clues-found');
+        const totalClues = document.getElementById('total-clues');
+        const nextButton = document.getElementById('next-button');
+        const diagnosisScreen = document.getElementById('diagnosis-screen');
+        const diagnosisText = document.getElementById('diagnosis-text');
+        
+        const feedbackModal = document.getElementById('feedback-modal');
+        const feedbackText = document.getElementById('feedback-text');
+
+        function startGame() {
+            currentStudentIndex = 0;
+            startScreen.classList.add('hidden');
+            endScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            loadStudent();
+        }
+
+        function loadStudent() {
+            const student = students[currentStudentIndex];
+            studentName.textContent = student.name;
+            studentDescription.innerHTML = student.description;
+            diagnosisText.textContent = student.diagnosis;
+            
+            diagnosisScreen.classList.add('hidden');
+            nextButton.classList.add('hidden');
+            
+            const clueElements = studentDescription.querySelectorAll('.clue');
+            foundCluesCount = 0;
+            
+            cluesFound.textContent = foundCluesCount;
+            totalClues.textContent = clueElements.length;
+
+            clueElements.forEach(clue => {
+                clue.classList.remove('found'); // Garante que as pistas não comecem como "found"
+                clue.addEventListener('click', handleClueClick);
+                /* clue.style.color = '#2563eb'; LINHA REMOVIDA */
+            });
+            
+            nextButton.textContent = "Ver Diagnóstico";
+            nextButton.onclick = showDiagnosis;
+        }
+
+        function handleClueClick(event) {
+            const clue = event.target;
+            if (clue.classList.contains('found')) return; // Impede clicar na mesma pista
+
+            clue.classList.add('found');
+            foundCluesCount++;
+            cluesFound.textContent = foundCluesCount;
+            
+            feedbackText.textContent = clue.dataset.feedback;
+            openModal();
+
+            if (foundCluesCount == studentDescription.querySelectorAll('.clue').length) {
+                nextButton.classList.remove('hidden');
+            }
+        }
+
+        function showDiagnosis() {
+            diagnosisScreen.classList.remove('hidden');
+            // Remove os event listeners das pistas para que não possam mais ser clicadas
+            studentDescription.querySelectorAll('.clue').forEach(clue => {
+                clue.removeEventListener('click', handleClueClick);
+                clue.style.cursor = 'default';
+                // A cor da pista encontrada já é definida pelo .found, então não precisa resetar
+                clue.style.textShadow = 'none'; // Remove o brilho
+            });
+
+            if (currentStudentIndex < students.length - 1) {
+                nextButton.textContent = "Próximo Caso";
+                nextButton.onclick = nextStudent;
+            } else {
+                nextButton.textContent = "Finalizar Investigação";
+                nextButton.onclick = endGame;
+            }
+        }
+        
+        function nextStudent() {
+            currentStudentIndex++;
+            loadStudent();
+        }
+
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+        }
+
+        function restartGame() {
+            endScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+        
+        function openModal() {
+            feedbackModal.classList.add('open');
+        }
+
+        function closeModal(event) {
+            // Fecha o modal apenas se clicar fora do conteúdo ou na área do modal
+            if (event.target.id === 'feedback-modal') {
+                feedbackModal.classList.remove('open');
+            }
+        }
+
+        // Adiciona um listener para fechar o modal ao clicar no botão "Próxima"
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.modal-content') && event.target.tagName !== 'BUTTON') {
+                event.stopPropagation(); 
+            }
+        });
+
+    </script>
+</body>
+</html>
+
